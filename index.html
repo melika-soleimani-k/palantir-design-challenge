@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html class="h-full bg-[#080C14] text-slate-100" lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+  <title>Interchange Discrepancy Console</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      user-select: none;
+    }
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .telemetry-grid {
+      background-image: radial-gradient(rgba(38, 51, 71, 0.4) 1px, transparent 1px);
+      background-size: 16px 16px;
+    }
+    .pax-corridor-hatch {
+      background: repeating-linear-gradient(
+        -45deg,
+        rgba(147, 51, 234, 0.18),
+        rgba(147, 51, 234, 0.18) 6px,
+        rgba(147, 51, 234, 0.32) 6px,
+        rgba(147, 51, 234, 0.32) 12px
+      );
+    }
+    ::-webkit-scrollbar {
+      display: none;
+    }
+    * {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="w-full h-screen max-h-screen overflow-hidden bg-[#080C14] text-slate-100 select-none flex flex-col justify-between telemetry-grid">
+
+  <!-- 1. GLOBAL SYSTEM HEADER (Fixed: No right-edge overflow on any resolution) -->
+  <header class="h-[42px] shrink-0 border-b border-[#1E293B] bg-[#0A101D] px-3.5 flex items-center justify-between z-20 overflow-hidden">
+    <!-- Left cluster -->
+    <div class="flex items-center gap-2.5 shrink-0">
+      <div class="flex items-center gap-2">
+        <div class="w-3 h-3 bg-sky-400 rounded-sm shadow-[0_0_8px_rgba(56,189,248,0.7)] flex items-center justify-center">
+          <div class="w-1 h-1 bg-[#080C14] rounded-[0.5px]"></div>
+        </div>
+        <span class="font-mono font-bold tracking-wider text-[11.5px] text-slate-100 uppercase">Interchange Discrepancy Console</span>
+      </div>
+      <div class="h-3.5 w-[1px] bg-slate-700/80 mx-0.5"></div>
+      <span class="bg-[#121A2B] border border-[#2B3B52] text-slate-300 px-2 py-0.5 rounded text-[10px] font-mono tracking-tight whitespace-nowrap flex items-center gap-1 shadow-sm">
+        <span class="text-slate-500 font-medium">Role:</span> <strong class="text-slate-200 font-semibold">Corridor Dispatcher</strong>
+      </span>
+      <div class="flex items-center gap-1 bg-amber-950/40 border border-amber-600/50 text-amber-300 px-2 py-0.5 rounded-full text-[10px] font-medium tracking-tight whitespace-nowrap shadow-sm">
+        <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping inline-block"></span>
+        <span class="font-semibold">Arrival Forecasts Disagree</span>
+      </div>
+    </div>
+    <!-- Right cluster (Optimized width & padding to prevent off-screen clipping) -->
+    <div class="flex items-center shrink-0 gap-2">
+      <div class="bg-[#101726] border border-[#23334A] text-slate-300 px-2.5 py-0.5 rounded text-[10px] font-mono whitespace-nowrap flex items-center gap-1.5 shadow-sm">
+        <span class="w-1.5 h-1.5 rounded-full bg-sky-400 shadow-[0_0_6px_rgba(56,189,248,0.7)]"></span>
+        <span>SNAPSHOT: <strong class="text-white font-semibold">18:22:15 CET</strong> <span class="text-slate-500">(frozen)</span> · <span class="text-amber-300 font-semibold">01:45</span> to 18:24 dep</span>
+      </div>
+      <span class="bg-rose-950/40 border border-rose-800/60 text-rose-300 font-mono text-[10px] px-2 py-0.5 rounded whitespace-nowrap shrink-0 flex items-center gap-1 shadow-sm">
+        <span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
+        <span class="font-medium">Synthetic Scenario · No Directives</span>
+      </span>
+    </div>
+  </header>
+
+  <!-- 2. MAIN WORKSPACE (Full responsive width & height, zero-scroll) -->
+  <main class="flex-1 min-h-0 w-full px-3 py-2 gap-3 flex overflow-hidden box-border">
+
+    <!-- LEFT PANE (58% width, fully responsive & optimized) -->
+    <section class="w-[58%] min-w-0 h-full flex flex-col justify-between overflow-hidden bg-[#0E1626]/90 border border-[#1E293B] rounded-lg p-2.5 shadow-xl backdrop-blur-sm gap-2">
+      
+      <!-- Section 1 Header -->
+      <div class="flex flex-col gap-0.5 shrink-0 border-b border-[#1E293B]/80 pb-1.5">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-sky-400 shadow-[0_0_8px_rgba(56,189,248,0.7)]"></span>
+            <h2 class="text-[12px] font-bold text-white tracking-wide uppercase font-mono">1. Observed Signals &amp; Forecasts — Bus 72</h2>
+          </div>
+          <span class="bg-[#162032] border border-sky-500/40 text-sky-300 px-2 py-0.5 rounded text-[10px] font-mono whitespace-nowrap font-medium">
+            Platform B Intermodal
+          </span>
+        </div>
+        <p class="text-[10px] text-slate-400 leading-tight">
+          GPS ping recorded at <span class="text-slate-200 font-mono font-semibold">18:22:03</span> (12s ago, 1.2 km away). <span class="text-rose-400 font-mono font-medium">18:27:15</span> is an analytical model; app assumes free-flow speed.
+        </p>
+      </div>
+
+      <!-- 4 Telemetry Ingest Cards (Sleek & Compact) -->
+      <div class="flex flex-col gap-1 shrink-0">
+        <!-- Card 1: Static GTFS Timetable -->
+        <div class="flex items-center justify-between px-2.5 py-1 bg-[#141E30] border border-[#23334A] rounded text-[10.5px] hover:border-slate-500 transition-colors">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-slate-400 shrink-0"></span>
+            <span class="text-slate-200 font-semibold whitespace-nowrap">Static GTFS Timetable</span>
+            <span class="text-[9.5px] text-slate-400 font-mono whitespace-nowrap">(Scheduled baseline)</span>
+          </div>
+          <div class="flex items-center gap-2 font-mono">
+            <span class="text-[9.5px] text-slate-400">Target</span>
+            <span class="text-slate-100 font-bold px-2 py-0.5 bg-[#0A101D] border border-slate-700/80 rounded tracking-wider text-[10px]">18:22:00</span>
+          </div>
+        </div>
+        <!-- Card 2: Consumer App ETA -->
+        <div class="flex items-center justify-between px-2.5 py-1 bg-amber-950/20 border border-amber-500/40 rounded text-[10.5px] hover:border-amber-400/60 transition-colors">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-amber-400 shrink-0 shadow-[0_0_6px_rgba(251,191,36,0.6)]"></span>
+            <span class="text-amber-200 font-semibold whitespace-nowrap">Consumer App ETA</span>
+            <span class="text-[9.5px] text-amber-400/80 font-mono whitespace-nowrap">(Optimistic free-flow · +90s error)</span>
+          </div>
+          <div class="flex items-center gap-2 font-mono">
+            <span class="text-[9.5px] text-amber-400/90 font-medium">Uncalibrated</span>
+            <span class="text-amber-300 font-bold px-2 py-0.5 bg-[#1C1608] border border-amber-600/50 rounded shadow-sm tracking-wider text-[10px]">18:23:30</span>
+          </div>
+        </div>
+        <!-- Card 3: Sensor Model ETA -->
+        <div class="flex items-center justify-between px-2.5 py-1 bg-rose-950/25 border border-rose-500/40 rounded text-[10.5px] hover:border-rose-400/60 transition-colors">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-rose-400 shrink-0 shadow-[0_0_6px_rgba(251,113,133,0.6)]"></span>
+            <span class="text-rose-200 font-semibold whitespace-nowrap">Sensor Model ETA</span>
+            <span class="text-[9.5px] text-rose-300/80 font-mono whitespace-nowrap">(Hardware ping + bottleneck · +05m 15s delay)</span>
+          </div>
+          <div class="flex items-center gap-2 font-mono">
+            <span class="text-[9.5px] text-rose-300 font-medium">Telemetry</span>
+            <span class="text-rose-300 font-bold px-2 py-0.5 bg-[#200A0E] border border-rose-600/50 rounded shadow-sm tracking-wider text-[10px]">18:27:15</span>
+          </div>
+        </div>
+        <!-- Card 4: Est. Transfer Complete -->
+        <div class="flex items-center justify-between px-2.5 py-1 bg-purple-950/25 border border-purple-500/40 rounded text-[10.5px] hover:border-purple-400/60 transition-colors">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-purple-400 shrink-0 shadow-[0_0_6px_rgba(192,132,252,0.6)]"></span>
+            <span class="text-purple-200 font-semibold whitespace-nowrap">Est. Transfer Complete</span>
+            <span class="text-[9.5px] text-purple-300/80 font-mono whitespace-nowrap">(185m walk @ 1.2 m/s + 30s buffer = 03m 04s)</span>
+          </div>
+          <div class="flex items-center gap-2 font-mono">
+            <span class="text-[9.5px] text-purple-300 font-medium">Pax Ready</span>
+            <span class="text-purple-300 font-bold px-2 py-0.5 bg-[#1B0C2A] border border-purple-600/50 rounded shadow-sm tracking-wider text-[10px]">≈18:30:19</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 540S SYNCHRONIZED TEMPORAL AXIS (EXPANDED HEIGHT & ZERO-CROWDING, FIX FOR GREEN & PURPLE AREAS) -->
+      <div class="bg-[#0B111D] border border-[#1E293B] rounded-lg p-2.5 px-4 flex flex-col justify-between flex-1 relative overflow-hidden min-h-[185px]">
+        
+        <!-- Axis Legend Header (Fixed: Wide spacing between title and legend tags) -->
+        <div class="flex items-center justify-between text-[10px] font-mono border-b border-[#1E293B]/80 pb-1.5 shrink-0">
+          <div class="flex items-center gap-2 shrink-0">
+            <span class="text-sky-400 font-bold tracking-wider uppercase text-[10.5px]">540s Temporal Axis</span>
+            <span class="text-slate-500 text-[9.5px] font-medium">(18:22:00 → 18:31:00)</span>
+          </div>
+          <!-- Clean, widely spaced tags so purple line never collides -->
+          <div class="flex items-center gap-2.5 text-[9.5px] font-semibold uppercase tracking-wider text-slate-300 shrink-0">
+            <span class="flex items-center gap-1 whitespace-nowrap"><span class="w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0"></span>GTFS</span>
+            <span class="flex items-center gap-1 whitespace-nowrap"><span class="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0 shadow-[0_0_6px_rgba(251,191,36,0.6)]"></span>App</span>
+            <span class="flex items-center gap-1 whitespace-nowrap"><span class="w-1.5 h-1.5 rounded-full bg-rose-400 shrink-0 shadow-[0_0_6px_rgba(251,113,133,0.6)]"></span>Sensor</span>
+            <span class="flex items-center gap-1 whitespace-nowrap"><span class="w-1.5 h-1.5 rounded-full bg-purple-400 shrink-0 shadow-[0_0_6px_rgba(192,132,252,0.6)]"></span>Walk</span>
+            <span class="flex items-center gap-1 whitespace-nowrap"><span class="w-2 h-1.5 rounded-[0.5px] bg-sky-400 shrink-0 shadow-[0_0_6px_rgba(56,189,248,0.7)]"></span>Train</span>
+          </div>
+        </div>
+
+        <!-- TALL & SPACIOUS TIMELINE GRAPHIC AREA (Height 130px, plenty of vertical room for badges and stems) -->
+        <div class="relative w-full h-[130px] my-auto">
+          <!-- Subtle Vertical Guidelines -->
+          <div class="absolute inset-0 pointer-events-none">
+            <div class="absolute top-0 bottom-0 w-px bg-slate-800/50" style="left: 0%;"></div>
+            <div class="absolute top-0 bottom-0 w-px bg-slate-800/40" style="left: 11.11%;"></div>
+            <div class="absolute top-0 bottom-0 w-px bg-sky-500/20" style="left: 22.22%;"></div>
+            <div class="absolute top-0 bottom-0 w-px bg-slate-800/40" style="left: 33.33%;"></div>
+            <div class="absolute top-0 bottom-0 w-px bg-slate-800/40" style="left: 44.44%;"></div>
+            <div class="absolute top-0 bottom-0 w-px bg-slate-800/60" style="left: 55.56%;"></div>
+            <div class="absolute top-0 bottom-0 w-px bg-slate-800/40" style="left: 66.67%;"></div>
+            <div class="absolute top-0 bottom-0 w-px bg-slate-800/40" style="left: 77.78%;"></div>
+            <div class="absolute top-0 bottom-0 w-px bg-slate-800/40" style="left: 88.89%;"></div>
+            <div class="absolute top-0 bottom-0 w-px bg-emerald-500/20" style="left: 100%;"></div>
+          </div>
+
+          <!-- Base Horizon track line (Centered at 64px) -->
+          <div class="absolute top-[64px] left-0 right-0 h-[2.5px] bg-slate-700/80 rounded-full"></div>
+
+          <!-- Shaded Purple Corridor (Pax Walk Window): 18:27:15 (58.33%) to 18:30:19 (92.41%) -->
+          <div class="absolute top-[48px] h-[34px] pax-corridor-hatch border-y border-purple-500/50 rounded flex items-center justify-center pointer-events-none z-10 shadow-[0_0_12px_rgba(168,85,247,0.15)]" style="left: 58.33%; width: 34.08%;">
+            <span class="text-[9.5px] font-mono uppercase tracking-wider text-purple-300 font-bold bg-[#0D091B]/95 px-2 py-0.5 rounded border border-purple-500/40">Pax Walk: 184s</span>
+          </div>
+
+          <!-- 18:22:00 (0.00%) - Static GTFS Timetable Baseline -->
+          <div class="absolute top-[59px] left-0 flex flex-col items-start z-20 pointer-events-none" style="left: 0%;">
+            <div class="w-3 h-3 rounded-full bg-slate-400 border-2 border-[#080C14] shadow-sm"></div>
+            <div class="w-[1px] h-3 bg-slate-500 ml-1"></div>
+            <span class="text-[10px] font-mono text-slate-200 font-bold bg-[#0B111D] border border-slate-700/80 px-1.5 py-0.5 rounded shadow-md tracking-tight whitespace-nowrap">18:22:00</span>
+          </div>
+
+          <!-- 18:23:30 (16.67%) - Consumer App ETA (Top Stem) -->
+          <div class="absolute top-[8px] -translate-x-1/2 flex flex-col items-center z-20 pointer-events-none" style="left: 16.67%;">
+            <span class="text-[10px] font-mono text-amber-300 font-bold bg-[#1C1608] px-2 py-0.5 rounded border border-amber-600/50 shadow-md tracking-wide whitespace-nowrap">18:23:30</span>
+            <div class="w-[1px] h-[30px] bg-amber-500/60"></div>
+            <div class="w-3 h-3 rounded-full bg-amber-400 border-2 border-[#080C14] shadow-[0_0_8px_rgba(251,191,36,0.9)]"></div>
+          </div>
+
+          <!-- 18:24:00 (22.22%) - Scheduled Train Baseline Diamond -->
+          <div class="absolute top-[59px] -translate-x-1/2 flex flex-col items-center pointer-events-none z-20" style="left: 22.22%;">
+            <div class="w-3 h-3 rotate-45 border-2 border-sky-400 bg-sky-950 shadow-[0_0_6px_rgba(56,189,248,0.7)]"></div>
+            <div class="w-[1px] h-3 bg-sky-500/50"></div>
+            <span class="text-[10px] font-mono text-sky-300 whitespace-nowrap font-bold bg-[#0B111D] border border-sky-500/40 px-1.5 py-0.5 rounded shadow-md tracking-tight">18:24:00 (Sched)</span>
+          </div>
+
+          <!-- 18:27:15 (58.33%) - Sensor Model ETA -->
+          <div class="absolute top-[59px] -translate-x-1/2 flex flex-col items-center z-20 pointer-events-none" style="left: 58.33%;">
+            <div class="w-3 h-3 rounded-full bg-rose-500 border-2 border-[#080C14] shadow-[0_0_10px_rgba(244,63,94,0.9)]"></div>
+            <div class="w-[1px] h-3 bg-rose-500/60"></div>
+            <span class="text-[10px] font-mono text-rose-300 font-bold bg-[#200A0E] px-2 py-0.5 rounded border border-rose-600/50 whitespace-nowrap shadow-md tracking-wide">18:27:15</span>
+          </div>
+
+          <!-- 18:30:19 (92.41%) - Est Transfer Complete / Pax Ready (Top Stem) -->
+          <div class="absolute top-[8px] -translate-x-1/2 flex flex-col items-center z-20 pointer-events-none" style="left: 92.41%;">
+            <span class="text-[10px] font-mono text-purple-200 font-bold bg-[#1B0C2A] px-2 py-0.5 rounded border border-purple-500/50 shadow-md tracking-wide whitespace-nowrap">≈18:30:19</span>
+            <div class="w-[1px] h-[30px] bg-purple-500/60"></div>
+            <div class="w-3 h-3 rounded-full bg-purple-400 border-2 border-[#080C14] shadow-[0_0_8px_rgba(192,132,252,0.8)]"></div>
+          </div>
+
+          <!-- Dynamic Cyan Laser Line tracking active train departure -->
+          <div class="absolute top-0 bottom-0 w-[2px] bg-sky-400 shadow-[0_0_12px_#38bdf8] transition-all duration-300 z-30 pointer-events-none" id="cyan-laser" style="left: 55.56%;">
+            <div class="absolute -top-3.5 bg-sky-400 text-[#080C14] font-mono font-extrabold text-[10px] px-1.5 py-0.5 rounded shadow-lg whitespace-nowrap uppercase tracking-tight -translate-x-1/2" id="laser-label">DEP 18:27:00</div>
+            <div class="absolute top-[60px] -left-[3px] w-2 h-2 rounded-full bg-white shadow-[0_0_8px_#fff]"></div>
+          </div>
+        </div>
+
+        <!-- OPERATIONAL RULER (Crisp & Well Separated) -->
+        <div class="relative w-full h-[20px] shrink-0 border-t border-[#1E293B]">
+          <div class="absolute top-0 left-0 flex flex-col items-start pointer-events-none">
+            <div class="w-[1.5px] h-2 bg-slate-400"></div>
+            <span class="font-mono text-[9.5px] font-semibold text-slate-300 tracking-wider mt-0.5 whitespace-nowrap">18:22</span>
+          </div>
+          <div class="absolute top-0 -translate-x-1/2 flex flex-col items-center pointer-events-none" style="left: 11.11%;">
+            <div class="w-px h-1 bg-slate-600"></div>
+            <span class="font-mono text-[8.5px] font-medium text-slate-500 tracking-tight mt-0.5 whitespace-nowrap">18:23</span>
+          </div>
+          <div class="absolute top-0 -translate-x-1/2 flex flex-col items-center pointer-events-none" style="left: 22.22%;">
+            <div class="w-[1.5px] h-2.5 bg-sky-400 shadow-[0_0_4px_rgba(56,189,248,0.7)]"></div>
+            <span class="font-mono text-[9.5px] font-bold text-sky-400 tracking-wider mt-0.5 whitespace-nowrap">18:24</span>
+          </div>
+          <div class="absolute top-0 -translate-x-1/2 flex flex-col items-center pointer-events-none" style="left: 33.33%;">
+            <div class="w-px h-1 bg-slate-600"></div>
+            <span class="font-mono text-[8.5px] font-medium text-slate-500 tracking-tight mt-0.5 whitespace-nowrap">18:25</span>
+          </div>
+          <div class="absolute top-0 -translate-x-1/2 flex flex-col items-center pointer-events-none" style="left: 44.44%;">
+            <div class="w-[1.5px] h-2 bg-slate-400"></div>
+            <span class="font-mono text-[9.5px] font-semibold text-slate-300 tracking-wider mt-0.5 whitespace-nowrap">18:26</span>
+          </div>
+          <div class="absolute top-0 -translate-x-1/2 flex flex-col items-center pointer-events-none" style="left: 55.56%;">
+            <div class="w-[1.5px] h-2 bg-slate-400"></div>
+            <span class="font-mono text-[9.5px] font-semibold text-slate-300 tracking-wider mt-0.5 whitespace-nowrap">18:27</span>
+          </div>
+          <div class="absolute top-0 -translate-x-1/2 flex flex-col items-center pointer-events-none" style="left: 66.67%;">
+            <div class="w-[1.5px] h-2 bg-slate-400"></div>
+            <span class="font-mono text-[9.5px] font-semibold text-slate-300 tracking-wider mt-0.5 whitespace-nowrap">18:28</span>
+          </div>
+          <div class="absolute top-0 -translate-x-1/2 flex flex-col items-center pointer-events-none" style="left: 77.78%;">
+            <div class="w-px h-1 bg-slate-600"></div>
+            <span class="font-mono text-[8.5px] font-medium text-slate-500 tracking-tight mt-0.5 whitespace-nowrap">18:29</span>
+          </div>
+          <div class="absolute top-0 -translate-x-1/2 flex flex-col items-center pointer-events-none" style="left: 88.89%;">
+            <div class="w-[1.5px] h-2 bg-slate-400"></div>
+            <span class="font-mono text-[9.5px] font-semibold text-slate-300 tracking-wider mt-0.5 whitespace-nowrap">18:30</span>
+          </div>
+          <div class="absolute top-0 right-0 flex flex-col items-end pointer-events-none">
+            <div class="w-[1.5px] h-2 bg-slate-400"></div>
+            <span class="font-mono text-[9.5px] font-semibold text-slate-300 tracking-wider mt-0.5 whitespace-nowrap">18:31</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3 METRIC CARDS (FIX FOR GRAY AREA: Redesigned as sleek, compact horizontal stat pills) -->
+      <div class="grid grid-cols-3 gap-2 shrink-0">
+        <div class="bg-[#121B2C] border border-[#23334A] rounded-lg px-2.5 py-1.5 flex items-center justify-between shadow-sm">
+          <div>
+            <div class="text-[9px] font-mono uppercase text-slate-400 tracking-wider font-semibold">Sample Impact</div>
+            <div class="text-[9.5px] text-slate-500">Riders transferring</div>
+          </div>
+          <div class="text-[15px] font-mono font-bold text-white tracking-tight">≈23 Pax</div>
+        </div>
+        <div class="bg-[#121B2C] border border-[#23334A] rounded-lg px-2.5 py-1.5 flex items-center justify-between shadow-sm">
+          <div>
+            <div class="text-[9px] font-mono uppercase text-slate-400 tracking-wider font-semibold">Allowance</div>
+            <div class="text-[9.5px] text-slate-500">184s walk + buffer</div>
+          </div>
+          <div class="text-[15px] font-mono font-bold text-purple-300 tracking-tight">≈03m 04s</div>
+        </div>
+        <div class="bg-[#121B2C] border border-[#23334A] rounded-lg px-2.5 py-1.5 flex items-center justify-between shadow-sm">
+          <div>
+            <div class="text-[9px] font-mono uppercase text-slate-400 tracking-wider font-semibold">Wait If Missed</div>
+            <div class="text-[9.5px] text-slate-500 font-mono">Headway 65m</div>
+          </div>
+          <div class="text-[15px] font-mono font-bold text-amber-300 tracking-tight">≈58m 41s</div>
+        </div>
+      </div>
+
+      <!-- LIVE SYSTEM AUDIT LOG (Compact, clean font hierarchy) -->
+      <div class="bg-[#0A0F18] border border-[#1A2536] p-2 rounded-lg shrink-0 flex flex-col gap-1">
+        <div class="flex items-center justify-between text-[9px] font-mono text-slate-400 uppercase tracking-wider pb-0.5 border-b border-[#1E293B]/60">
+          <span class="font-bold text-slate-300 flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-sky-400"></span>
+            Live System Audit Log
+          </span>
+          <span class="text-slate-500 font-mono text-[8.5px]">Buffered stream</span>
+        </div>
+        <div class="flex flex-col gap-0.5">
+          <div class="text-slate-400 text-[9.5px] font-mono flex items-center gap-1.5">
+            <span class="w-1 h-1 rounded-full bg-slate-500 shrink-0"></span>
+            <span>18:22:03 CET · Hardware GPS Ping Received (Bus 72, 1.2km away)</span>
+          </div>
+          <div class="text-amber-400/90 text-[9.5px] font-mono flex items-center gap-1.5">
+            <span class="w-1 h-1 rounded-full bg-amber-400 shrink-0"></span>
+            <span>18:22:15 CET · Snapshot Frozen. Telemetry discrepancy flagged.</span>
+          </div>
+          <div class="text-purple-300 text-[9.5px] font-mono flex items-center gap-1.5">
+            <span class="w-1 h-1 rounded-full bg-purple-400 shrink-0"></span>
+            <span>18:22:18 CET · Footway model updated: 185m @ 1.2 m/s = 184s total.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Technical Footnote -->
+      <div class="px-2.5 py-1 bg-[#0A101D] border border-[#1E293B]/70 rounded text-[9.5px] text-slate-400 font-mono flex items-center justify-between shrink-0">
+        <span>Footway Engine: 185m corridor @ 1.2 m/s walk velocity</span>
+        <span class="text-sky-400 font-medium">Model v4.2 calibrated</span>
+      </div>
+    </section>
+
+    <!-- RIGHT PANE (42% width, fully responsive & beautiful) -->
+    <section class="w-[42%] min-w-0 h-full flex flex-col justify-between overflow-hidden bg-[#0E1626]/90 border border-[#1E293B] rounded-lg p-2.5 shadow-xl backdrop-blur-sm gap-2">
+      
+      <!-- Section 2 Header -->
+      <div class="flex flex-col gap-0.5 shrink-0 border-b border-[#1E293B]/80 pb-1.5">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-sky-400 shadow-[0_0_8px_rgba(56,189,248,0.7)]"></span>
+            <h2 class="text-[12px] font-bold text-white tracking-wide uppercase font-mono">2. Evaluate Hold Options</h2>
+          </div>
+          <span class="bg-sky-950/40 border border-sky-500/40 text-sky-300 font-mono text-[10px] px-2 py-0.5 rounded font-semibold whitespace-nowrap">
+            Dispatch Authority
+          </span>
+        </div>
+        <p class="text-[10px] text-slate-400 leading-tight">
+          Human decision step · Trade-off assessment against passenger transfer readiness
+        </p>
+      </div>
+
+      <!-- 3 QUICK DECISION CARDS (FIX FOR BLUE AREA: Clean single-line red metrics & symmetrical layout) -->
+      <div class="flex flex-col gap-1.5 shrink-0">
+        <!-- Card 0s -->
+        <button class="w-full text-left px-2.5 py-1.5 rounded-lg border transition-all duration-150 cursor-pointer bg-[#121A2B] border-[#223147] hover:border-slate-500 flex flex-col gap-0.5" id="card-0s" onclick="selectHold('0s')">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-rose-950/70 text-rose-300 border border-rose-800/70 font-bold whitespace-nowrap shadow-sm">🔴 NO GO (Connection Broken)</span>
+            <span class="text-[10.5px] font-mono text-slate-300 font-semibold whitespace-nowrap">0s (Dep: 18:24:00)</span>
+          </div>
+          <div class="flex items-center justify-between gap-2 mt-0.5">
+            <span class="text-[10.5px] font-mono font-bold text-rose-400 whitespace-nowrap">23 Pax Missed · -379s Deficit</span>
+            <span class="text-[9.5px] font-mono text-slate-400 whitespace-nowrap">0m rail delay · 59m wait</span>
+          </div>
+        </button>
+        <!-- Card 180s (Initial Active) -->
+        <button class="w-full text-left px-2.5 py-1.5 rounded-lg border transition-all duration-150 cursor-pointer bg-sky-950/20 border-sky-400 ring-2 ring-sky-400 shadow-[0_0_12px_rgba(56,189,248,0.25)] flex flex-col gap-0.5" id="card-180s" onclick="selectHold('180s')">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-amber-950/70 text-amber-300 border border-amber-600/60 font-bold whitespace-nowrap shadow-sm">⚠️ POOR OPTION (Ineffective Hold)</span>
+            <span class="text-[10.5px] font-mono text-white font-bold whitespace-nowrap">180s (Dep: 18:27:00)</span>
+          </div>
+          <div class="flex items-center justify-between gap-2 mt-0.5">
+            <span class="text-[10.5px] font-mono font-bold text-rose-400 whitespace-nowrap">Connection Fails · -199s Deficit</span>
+            <span class="text-[9.5px] font-mono text-slate-300 whitespace-nowrap">+3m delay · 0% saved</span>
+          </div>
+        </button>
+        <!-- Card 420s -->
+        <button class="w-full text-left px-2.5 py-1.5 rounded-lg border transition-all duration-150 cursor-pointer bg-[#121A2B] border-[#223147] hover:border-slate-500 flex flex-col gap-0.5" id="card-420s" onclick="selectHold('420s')">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-emerald-950/70 text-emerald-300 border border-emerald-600/60 font-bold whitespace-nowrap shadow-sm">🟢 FEASIBLE (Requires Clearance)</span>
+            <span class="text-[10.5px] font-mono text-slate-300 font-semibold whitespace-nowrap">420s (Dep: 18:31:00)</span>
+          </div>
+          <div class="flex items-center justify-between gap-2 mt-0.5">
+            <span class="text-[10.5px] font-mono font-bold text-emerald-400 whitespace-nowrap">23 Pax Saved · +41s Margin</span>
+            <span class="text-[9.5px] font-mono text-slate-300 whitespace-nowrap">📞 Call Line Controller · +7m</span>
+          </div>
+        </button>
+      </div>
+
+      <!-- SIMULATED OPERATIONAL READOUT PANEL (FIX FOR YELLOW BOX: 2x2 grid fits perfectly with zero text spillover) -->
+      <div class="bg-[#0B111D] border border-[#1E293B] rounded-lg p-2.5 flex flex-col justify-between flex-1 min-h-0 gap-1.5 shadow-md">
+        <!-- Readout Header -->
+        <div class="flex items-center justify-between border-b border-[#1E293B]/80 pb-1.5 gap-2">
+          <span class="text-[9.5px] font-mono uppercase text-slate-300 tracking-wider font-bold">SIMULATED OPERATIONAL READOUT · P4 INTERLOCK</span>
+          <span class="font-mono text-[10px] font-bold text-sky-300 px-2 py-0.5 rounded bg-sky-950/60 border border-sky-500/40 shrink-0 whitespace-nowrap shadow-sm" id="summary-dep-badge">Departure: 18:27:00</span>
+        </div>
+        <!-- Hero Stat Banner -->
+        <div class="w-full px-3 py-1.5 rounded-lg bg-[#141E30] border border-[#23334A] flex items-center justify-between gap-2 shadow-inner" id="hero-stat-container">
+          <div class="min-w-0">
+            <div class="text-[9px] uppercase font-mono text-slate-400 tracking-wider font-semibold">Transfer Timing Assessment</div>
+            <div class="text-[16px] font-mono font-bold text-rose-400 tracking-tight leading-tight mt-0.5 whitespace-nowrap" id="hero-stat-value">-199s Timing Deficit</div>
+          </div>
+          <div class="flex items-center justify-end shrink-0" id="hero-stat-tag-wrap">
+            <div id="hero-stat-tag" class="px-2 py-0.5 rounded text-[10px] font-mono font-bold whitespace-nowrap border bg-rose-950/70 text-rose-300 border-rose-800/80 shadow-sm">Ineffective Delay</div>
+          </div>
+        </div>
+        <!-- Line Controller Alert Banner -->
+        <div class="hidden bg-emerald-950/90 border border-emerald-400/80 text-emerald-200 text-[9.5px] px-2.5 py-1.5 rounded-lg font-mono flex items-center gap-2 shadow-md" id="controller-hotline-alert">
+          <span class="text-xs shrink-0">📞</span>
+          <span class="leading-tight">Line Controller Hotline Alerted: Simulated track clearance request logged for Platform 4.</span>
+        </div>
+        
+        <!-- 2x2 Telemetry / Decision Matrix (FIXED: Zero wrapping, clean and spacious layout) -->
+        <div class="grid grid-cols-2 gap-1.5 font-mono">
+          <div class="p-1.5 px-2 rounded-lg bg-[#101726] border border-[#1E293B] flex items-center justify-between gap-1 shadow-sm">
+            <span class="text-[9.5px] text-slate-400 font-medium shrink-0">Added Delay:</span>
+            <span class="text-[11.5px] font-bold text-slate-100 whitespace-nowrap" id="metric-added-delay">3m</span>
+          </div>
+          <div class="p-1.5 px-2 rounded-lg bg-[#101726] border border-[#1E293B] flex items-center justify-between gap-1 shadow-sm min-w-0">
+            <span class="text-[9.5px] text-slate-400 font-medium shrink-0">Headway:</span>
+            <span class="text-[10px] font-bold text-amber-300 whitespace-nowrap text-right" id="metric-next-headway">65m (Wait: 58m)</span>
+          </div>
+          <div class="p-1.5 px-2 rounded-lg bg-[#101726] border border-[#1E293B] flex items-center justify-between gap-1 shadow-sm min-w-0">
+            <span class="text-[9.5px] text-slate-400 font-medium shrink-0">Downstream:</span>
+            <span class="text-[10px] font-bold text-rose-400 whitespace-nowrap text-right truncate" id="metric-conflict">Mainline Jct (P4)</span>
+          </div>
+          <div class="p-1.5 px-2 rounded-lg bg-[#101726] border border-[#1E293B] flex items-center justify-between gap-1 shadow-sm">
+            <span class="text-[9.5px] text-slate-400 font-medium shrink-0">Transfer:</span>
+            <span class="text-[11px] font-bold text-rose-400 whitespace-nowrap text-right" id="metric-success">0% (23 Missed)</span>
+          </div>
+        </div>
+
+        <!-- Operational Rule & Clearance Banner -->
+        <div class="px-2.5 py-1 bg-[#0A101C] border border-[#1E293B] rounded-lg text-[9.5px] font-mono text-slate-400 flex items-center justify-between gap-2">
+          <span class="flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0"></span>
+            <span class="text-slate-300 font-medium">Signal Interlock: <span class="text-amber-300 font-semibold">Manual Override Req.</span></span>
+          </span>
+          <span class="text-slate-400 uppercase text-[9px] shrink-0 font-semibold bg-[#141E30] px-1.5 py-0.5 rounded border border-slate-700/60">Rule 4B-10</span>
+        </div>
+      </div>
+
+      <!-- Bottom Drawer & Action Button Stack -->
+      <div class="flex flex-col gap-1.5 shrink-0">
+        <!-- Progressive Expandable Drawer -->
+        <div class="hidden bg-[#0A101C] border border-sky-500/40 rounded-lg p-2.5 flex flex-col gap-1 shrink-0 transition-all shadow-lg" id="progressive-drawer">
+          <div class="flex items-center justify-between text-[9.5px] font-mono border-b border-[#1E293B] pb-1 text-sky-400">
+            <span class="font-bold uppercase tracking-wider">Level 2 Analysis &amp; Discrepancy Insight</span>
+            <span class="text-slate-400 text-[8.5px]">Advisory Preview</span>
+          </div>
+          <p class="text-[9.5px] text-slate-300 leading-tight" id="drawer-insight">
+            Under consumer app ETA, this hold appears to have a <strong class="text-amber-300 font-mono">+26s margin</strong>. Under sensor model forecast, it fails by <strong class="text-rose-400 font-mono">≈03m 19s (199s deficit)</strong> while penalizing the rail corridor.
+          </p>
+          <div class="p-1.5 rounded bg-rose-950/30 border border-rose-600/40 text-[9.5px] font-mono text-rose-300 leading-tight" id="drawer-directive-box">
+            <span class="font-bold">Operational Directive:</span> Ineffective hold · Not recommended for execution · Connection remains broken while adding 3 minutes rail corridor delay.
+          </div>
+        </div>
+        <!-- Review Simulated Option Button -->
+        <div class="flex flex-col gap-0.5 shrink-0">
+          <button class="w-full py-2 px-3 rounded bg-[#0284C7] hover:bg-[#38BDF8] active:bg-sky-600 text-white font-mono font-bold text-[11.5px] tracking-wider uppercase transition-all shadow-[0_0_15px_rgba(56,189,248,0.35)] flex items-center justify-center gap-2 cursor-pointer" id="btn-toggle-review" onclick="toggleProgressiveDrawer()">
+            <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+              <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+            </svg>
+            <span id="btn-review-text">Review Simulated Option</span>
+          </button>
+          <p class="text-center text-[9px] font-mono text-slate-500">
+            Prototype simulation interface · Nothing is transmitted or saved
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 3. GLOBAL FOOTER (Height 26px, border-t border-[#1E293B], text-[10px] font-mono text-slate-500, shrink-0) -->
+  <footer class="h-[26px] shrink-0 border-t border-[#1E293B] bg-[#0A101D] px-4 flex items-center justify-between text-[10px] font-mono text-slate-500 z-20">
+    <div class="flex items-center gap-2">
+      <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.7)]"></span>
+      <span class="text-slate-400 font-medium tracking-wide">Synthetic transit prototype · Design exercise</span>
+    </div>
+    <div class="flex items-center gap-2.5">
+      <span class="text-slate-400 tracking-tight">Viewport: <strong class="text-slate-300 font-semibold">Responsive 100% Fit (Zero-Scroll)</strong></span>
+      <span class="text-slate-600">|</span>
+      <span class="text-slate-400">Candidate: <strong class="text-slate-200 font-semibold">Melika Soleimanikhoshdoni</strong></span>
+    </div>
+  </footer>
+
+  <!-- 4. EMBEDDED VANILLA JAVASCRIPT STATE ENGINE -->
+  <script>
+    let activeState = '180s';
+    let isDrawerOpen = false;
+    let hotlineRequested = false;
+
+    const stateData = {
+      '0s': {
+        laserLeft: '22.22%',
+        laserLabel: 'DEP 18:24:00',
+        laserBadgeAnchor: '-translate-x-1/2',
+        departureTime: '18:24:00',
+        heroStat: '-379s Timing Deficit',
+        heroStatColor: 'text-rose-400',
+        isControllerCall: false,
+        heroTagText: 'On-Time Rail Release',
+        heroTagClass: 'bg-rose-950/70 text-rose-300 border-rose-800/80',
+        addedDelay: '0m',
+        nextHeadway: '65m (Wait: 58m)',
+        conflict: 'Slot Clear (Sched)',
+        successRate: '0% (23 Missed)',
+        successColor: 'text-rose-400',
+        insightText: 'Releasing train on schedule at 18:24:00 guarantees zero delay added to rail corridor, but causes transferring Bus 72 passengers to arrive at 18:30:19—missing the departure by 06m 19s (379s deficit).',
+        directiveHtml: '<span class="font-bold">Operational Directive:</span> Release train on schedule. Trigger Passenger App Advisory: "Connection missed. Next regional service departs at 19:29:00 (58m 41s wait)."'
+      },
+      '180s': {
+        laserLeft: '55.56%',
+        laserLabel: 'DEP 18:27:00',
+        laserBadgeAnchor: '-translate-x-1/2',
+        departureTime: '18:27:00',
+        heroStat: '-199s Timing Deficit',
+        heroStatColor: 'text-rose-400',
+        isControllerCall: false,
+        heroTagText: 'Ineffective Delay',
+        heroTagClass: 'bg-rose-950/70 text-rose-300 border-rose-800/80',
+        addedDelay: '3m',
+        nextHeadway: '65m (Wait: 58m)',
+        conflict: 'Mainline Jct (P4)',
+        successRate: '0% (23 Missed)',
+        successColor: 'text-rose-400',
+        insightText: 'Under consumer app ETA, this hold appears to have a <strong class="text-amber-300 font-mono">+26s margin</strong>. Under sensor model forecast, it fails by <strong class="text-rose-400 font-mono">≈03m 19s (199s deficit)</strong> while penalizing the rail corridor.',
+        directiveHtml: '<span class="font-bold">Operational Directive:</span> Ineffective hold · Not recommended for execution · Connection remains broken while adding 3 minutes rail corridor delay.'
+      },
+      '420s': {
+        laserLeft: '100%',
+        laserLabel: 'DEP 18:31:00',
+        laserBadgeAnchor: '-translate-x-full',
+        departureTime: '18:31:00',
+        heroStat: '+41s Timing Margin',
+        heroStatColor: 'text-emerald-400',
+        isControllerCall: true,
+        heroTagText: '📞 Call Line Controller Required',
+        heroTagClass: 'cursor-pointer px-2 py-0.5 rounded bg-emerald-950/70 hover:bg-emerald-900/90 border border-emerald-500/70 text-emerald-300 text-[10px] font-bold font-mono transition-all flex items-center gap-1 shadow-sm',
+        addedDelay: '7m',
+        nextHeadway: 'Protected (0m)',
+        conflict: 'P4 (Clearance Req.)',
+        successRate: '100% (23 Saved)',
+        successColor: 'text-emerald-400',
+        insightText: 'Under sensor model forecast, holding to 18:31:00 yields a <strong class="text-emerald-400 font-mono">+41s transfer buffer</strong>. However, adding 7 minutes may trigger downstream mainline junction conflicts that require dispatch clearance.',
+        directiveHtml: '<span class="font-bold">Operational Directive:</span> Request line-controller capacity and track clearance review (Simulated Preview). Unverified: Downstream junction conflicts and dwell variations.'
+      }
+    };
+
+    function selectHold(stateKey) {
+      activeState = stateKey;
+      const data = stateData[stateKey];
+
+      // Update Decision Card visual state
+      ['0s', '180s', '420s'].forEach(key => {
+        const btn = document.getElementById(`card-${key}`);
+        if (key === stateKey) {
+          btn.className = 'w-full text-left px-2.5 py-1.5 rounded-lg border transition-all duration-150 cursor-pointer bg-sky-950/20 border-sky-400 ring-2 ring-sky-400 shadow-[0_0_12px_rgba(56,189,248,0.25)] flex flex-col gap-0.5';
+        } else {
+          btn.className = 'w-full text-left px-2.5 py-1.5 rounded-lg border transition-all duration-150 cursor-pointer bg-[#121A2B] border-[#223147] hover:border-slate-500 flex flex-col gap-0.5';
+        }
+      });
+
+      // Reposition Cyan Departure Laser Line
+      const laser = document.getElementById('cyan-laser');
+      const laserLabel = document.getElementById('laser-label');
+      laser.style.left = data.laserLeft;
+      laserLabel.textContent = data.laserLabel;
+
+      laserLabel.classList.remove('-translate-x-1/2', '-translate-x-full');
+      laserLabel.classList.add(data.laserBadgeAnchor);
+
+      // Update Simulated Operational Readout Panel
+      document.getElementById('summary-dep-badge').textContent = `Departure: ${data.departureTime}`;
+      
+      const heroStatVal = document.getElementById('hero-stat-value');
+      heroStatVal.textContent = data.heroStat;
+      heroStatVal.className = `text-[16px] font-mono font-bold ${data.heroStatColor} tracking-tight leading-tight mt-0.5 whitespace-nowrap`;
+
+      const heroTagWrap = document.getElementById('hero-stat-tag-wrap');
+      const hotlineAlert = document.getElementById('controller-hotline-alert');
+
+      if (data.isControllerCall) {
+        hotlineAlert.classList.add('hidden');
+        hotlineRequested = false;
+        heroTagWrap.innerHTML = `
+          <button id="btn-call-controller" onclick="triggerControllerCall()" class="${data.heroTagClass}">
+            <span id="call-controller-text">${data.heroTagText}</span>
+          </button>
+        `;
+      } else {
+        hotlineAlert.classList.add('hidden');
+        hotlineRequested = false;
+        heroTagWrap.innerHTML = `
+          <div id="hero-stat-tag" class="px-2 py-0.5 rounded text-[10px] font-mono font-bold whitespace-nowrap border ${data.heroTagClass}">
+            ${data.heroTagText}
+          </div>
+        `;
+      }
+
+      // Update 2x2 Matrix
+      document.getElementById('metric-added-delay').textContent = data.addedDelay;
+      document.getElementById('metric-next-headway').textContent = data.nextHeadway;
+      document.getElementById('metric-conflict').textContent = data.conflict;
+      
+      const metricSuccess = document.getElementById('metric-success');
+      metricSuccess.textContent = data.successRate;
+      metricSuccess.className = `text-[11px] font-bold whitespace-nowrap text-right ${data.successColor}`;
+
+      // Update Progressive Drawer
+      document.getElementById('drawer-insight').innerHTML = data.insightText;
+      document.getElementById('drawer-directive-box').innerHTML = data.directiveHtml;
+    }
+
+    function triggerControllerCall() {
+      hotlineRequested = !hotlineRequested;
+      const hotlineAlert = document.getElementById('controller-hotline-alert');
+      const callText = document.getElementById('call-controller-text');
+      const btn = document.getElementById('btn-call-controller');
+
+      if (hotlineRequested) {
+        hotlineAlert.classList.remove('hidden');
+        callText.textContent = '✓ Sent to Controller';
+        btn.classList.add('bg-emerald-850', 'border-emerald-300');
+      } else {
+        hotlineAlert.classList.add('hidden');
+        callText.textContent = '📞 Call Line Controller Required';
+        btn.classList.remove('bg-emerald-850', 'border-emerald-300');
+      }
+    }
+
+    function toggleProgressiveDrawer() {
+      isDrawerOpen = !isDrawerOpen;
+      const drawer = document.getElementById('progressive-drawer');
+      const btnText = document.getElementById('btn-review-text');
+      const btn = document.getElementById('btn-toggle-review');
+
+      if (isDrawerOpen) {
+        drawer.classList.remove('hidden');
+        btnText.textContent = 'Hide Option Review';
+        btn.classList.remove('bg-[#0284C7]', 'hover:bg-[#38BDF8]');
+        btn.classList.add('bg-slate-700', 'hover:bg-slate-600', 'text-white');
+      } else {
+        drawer.classList.add('hidden');
+        btnText.textContent = 'Review Simulated Option';
+        btn.classList.add('bg-[#0284C7]', 'hover:bg-[#38BDF8]');
+        btn.classList.remove('bg-slate-700', 'hover:bg-slate-600', 'text-white');
+      }
+    }
+  </script>
+</body>
+</html>
